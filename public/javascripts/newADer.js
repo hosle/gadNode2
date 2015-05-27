@@ -8,9 +8,12 @@ Bmob.initialize('658f6515b185c5e53d612986bb6f79c6','089c27ec398ea3934dd350ddd376
 exports.newADer=function(tablename,jsonArr) {
     var Table = Bmob.Object.extend(tablename);
     var table = new Table();
+
     //adUnion.set("score", 137);
     //adUnion.set("playerName", "bmob");
     //adUnion.set("cheatMode", false);
+
+
 //添加数据，第一个入口参数是null
     table.save(jsonArr, {
         success: function (tablename) {

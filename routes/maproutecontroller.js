@@ -10,6 +10,7 @@ router.mapRoute=function(app){
     var users = require('./users');
     var bmob=require('./bmob');
     var newer=require('./testNewADer');
+    var searchresult=require('./GetShowAdResult')
 
     //index
     app.use('/',index);
@@ -22,6 +23,11 @@ router.mapRoute=function(app){
 
     //testNewADer
     app.get('/new',newer.x);
+
+    //getResult
+    app.get('/search',searchresult.x);
+    //getResult 不采取异步的方式
+    app.get('/search1',searchresult.y);
 
 }
 
