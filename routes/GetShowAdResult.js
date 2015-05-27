@@ -6,7 +6,7 @@ var searchAdUnion=require('../public/javascripts/searchAdUnion');
 
 exports.x=function(req,res,next){
     searchAdUnion.search4Show();
-    res.render('resultInfo',{info:'sucess'});
+    res.render('resultInfo',{info:'search4Show'});
 }
 exports.y=function(req,res,next){
     searchAdUnion.search4Show1();

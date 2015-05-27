@@ -4,7 +4,11 @@
 
 var Bmob = require('bmob').Bmob;
 Bmob.initialize('658f6515b185c5e53d612986bb6f79c6', '089c27ec398ea3934dd350ddd3760311');
-var async,async2 = require('async');
+//var async,async2 = require('async');
+var async=require('async');
+var async2=require('async');
+
+var util=require('./util');
 
 //A6
 var personalShowUpLimit;
@@ -15,19 +19,55 @@ var adersCollection ;
 
 var userId='000000';
 
-/*var getAdCollection2 = function () {
-    var Aders = Bmob.Object.extend('AdUnion');
-    var query = new Bmob.Query(Aders);
-    query.find({
-            success: function (results) {
-                adersCollection=results;
-            },
-            error: function (err) {
+/*
+对每一个广告商进行查询，找到该用户每个广告商的展示次数
+ */
+var countRecords_eachAder=function(aderslist,callback){
+    async2.map(aderslist,function(item,callback){
+        var AdRecord = Bmob.Object.extend("AdShowRecords");
+        var query = new Bmob.Query(AdRecord);
+
+        query.equalTo("userId", userId);
+        query.equalTo("ader", item);
+
+        //query.descending("applyTime");
+        query.find({
+                success: function (results) {
+                    // 查询成功，返回记录数量
+                    //if(results.length<personalShowUpLimit)
+                    if(results.length>0) {
+                        console.log(item.get('aderName') + "共有 " + results.length + " 条记录");
+                        //adersCollection2.push(results[0].get('ader'));
+                        callback(null,results[0]);
+                    }else
+                    callback(null,'');
+                },
+                error: function (error) {
+                    // 查询失败
+                    callback(error,null);
+                }
             }
+        );
+
+    },function(err,results){
+        if(err){
+            console.error("error: " + err);
+
+            return;
         }
-    )
-    ;
-}*/
+
+        console.log("map,results:"+results.length+"个"+results);
+        var i=0;
+        results.forEach(function(item){
+            i++;
+            console.log(i+"-"+item);
+        });
+        //countResult= results;
+        callback(err,results);
+    });
+
+}
+
 exports.search4Show = function () {
     try {
         async.waterfall([
@@ -39,7 +79,7 @@ exports.search4Show = function () {
                         success: function (results) {
                             adersCollection=results;
                             console.log("所有广告商查询成功");
-                            console.log(results.length);
+                            //console.log(results.length);
                             callback();
                         },
                         error: function (error) {
@@ -53,34 +93,20 @@ exports.search4Show = function () {
                // var adersCollection2=[];
                 console.log('userId:'+userId);
 
+                countRecords_eachAder(adersCollection,callback);
 
-                adersCollection.forEach(function (ader) {
-                    var AdRecord = Bmob.Object.extend("AdShowRecords");
-                    var query = new Bmob.Query(AdRecord);
+            },
+            function getAderlist(list,callback){
+                var newlist=util.delEmptyEle(list);
 
-                    query.equalTo("userId", userId);
-                    query.equalTo("ader", ader);
-                    query.include('ader');
-                    //query.descending("applyTime");
-                    query.find({
-                            success: function (results) {
-                                // 查询成功，返回记录数量
-                                //if(results.length<personalShowUpLimit)
-                                if(results.length>0) {
-                                    console.log(ader.get('aderName') + "共有 " + results.length + " 条记录");
-                                    adersCollection2.push(results[0].get('ader'));
-                                    callback(null,adersCollection2);
-                                }
-                            },
-                            error: function (error) {
-                                // 查询失败
-                                callback(error);
-                            }
-                        }
-                    );
-                });
+                var i=0;
+                newlist.forEach(function(item){
+                 i++;
+                 console.log(i+":"+item);
+                 });
 
 
+                callback(null,newlist);
             }
         ], function (err,result) {
             if (err)throw err;
@@ -90,7 +116,7 @@ exports.search4Show = function () {
                console.log("新筛选广告商数组"+a);
             });*/
             //console.log(result);
-        })
+        });
 
     } catch (err) {
         console.log(err);
