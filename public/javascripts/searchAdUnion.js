@@ -11,15 +11,17 @@ var async2 = require('async');
 var util = require('./util');
 
 //A6
+//未获取值
 var personalShowUpLimit;
 var jiangetime;
 
 //B4max 最后一次申请de时间
-var time_latestShow={'ctrip':''};
+var time_latestShow = {'ctrip': ''};
 
 //符合条件的广告商集合
 var adersCollection;
-
+var targetAder;
+//未获取值
 var userId = '000000';
 
 /*
@@ -36,12 +38,12 @@ var countRecords_eachAder = function (aderslist, callback) {
                 success: function (results) {
                     // 查询成功，返回记录数量
                     //if(results.length<personalShowUpLimit)
-                    if (results.length > 0) {
-                        var itemName=item.get('aderName');
+                    if (results.length > 0 && results.length < personalShowUpLimit) {
+                        var itemName = item.get('aderName');
                         console.log(itemName + "共有 " + results.length + " 条记录");
                         //adersCollection2.push(results[0].get('ader'));
                         //console.log(results[0].get('adType'));
-                        time_latestShow[itemName] =results[0].get('applyTimes');
+                        time_latestShow[itemName] = results[0].get('applyTimes');
 
                         //time_latestShow.itemName=results[0].get('applyTimes');
                         callback(null, results[0]);
@@ -93,7 +95,7 @@ var getAderlist_detail = function (aderArr, callback) {
     });
 }
 
-exports.search4Show = function () {
+exports.search4Show = function (callback) {
     try {
         async.waterfall([
             //获得所有广告商
@@ -133,36 +135,42 @@ exports.search4Show = function () {
                 getAderlist_detail(newlist, callback);
 
             },
-            function countGapTime(list,callback){
+            function countGapTime(list, callback) {
 
-                var curTime=util.getCurrentTime();
-                var newlist=[];
-                for(var i=0;i<list.length;i++){
-                    var itemName=list[i].get('aderName');
-                    if(util.diffTime(curTime,time_latestShow[itemName])>list[i].get('timeGap')) {
+                var curTime = util.getCurrentTime();
+                var newlist = [];
+                for (var i = 0; i < list.length; i++) {
+                    var itemName = list[i].get('aderName');
+                    if (util.diffTime(curTime, time_latestShow[itemName]) > list[i].get('timeGap')) {
                         newlist.push(list[i]);
-                        console.log('diffTime'+util.diffTime(curTime,time_latestShow[itemName]));
+                        console.log('diffTime' + util.diffTime(curTime, time_latestShow[itemName]));
                         console.log(list[i].get('aderName'));
                         //console.log('timeGap:'+list[i].get('timeGap'));}
                     }
                 }
-                callback(null,newlist);
+                callback(null, newlist);
             }
 
         ], function (err, result) {
             if (err)throw err;
             if (result != null)
-                //console.log("最终结果" + result[0].get('aderName'));
-            result.forEach(function(a){
-             console.log("最终新筛选广告商数组"+ a.get('aderName'));
-             });
+            //console.log("最终结果" + result[0].get('aderName'));
+                result.forEach(function (a) {
+                    console.log("最终新筛选广告商数组" + a.get('aderName'));
+                });
+            targetAder = result[0];
             //console.log(result);
+            //return result[0];
+            callback(null, result[0]);
         });
+
+        //return targetAder;
 
     } catch (err) {
         console.log(err);
     }
 }
+
 /*
 
  function search4Show
@@ -192,6 +200,104 @@ exports.search4Show = function () {
  3.2 从上面结果确定最终展示的广告商
  */
 
+
+exports.search4Click = function (vAderName,callback) {
+    try {
+        async.waterfall([
+                function getAder(callback) {
+                    var Aders = Bmob.Object.extend('AdUnion');
+                    var query = new Bmob.Query(Aders);
+                    query.equalTo('aderName',vAderName);
+                    query.find({
+                            success: function (results) {
+
+                                console.log("所有广告商查询成功"+results[0]);
+                                //console.log(results.length);
+                                callback(null,results[0]);
+                            },
+                            error: function (error) {
+                                callback(error);
+                            }
+                        }
+                    );
+                },
+                function compare1(vAder,callback){
+                    var Records = Bmob.Object.extend('AdShowRecords');
+                    var query = new Bmob.Query(Records);
+
+                    query.equalTo('userId',userId);
+                    query.equalTo('ader',vAder);
+                    query.count({
+                            success: function (count) {
+
+                                console.log(userId+"的该广告商总纪录数为"+count);
+                                if(count>=vAder.get('personalFanxianCount'))
+                                    callback(null,true);
+                                else
+                                    callback(null,false);
+                                //console.log(results.length);
+                               // callback(err,results[0]);
+                            },
+                            error: function (error) {
+                                callback(error);
+                            }
+                        }
+                    );
+                },
+                function compare2(situation,callback){
+                    if(!situation)callback(null,false);
+                    else{
+                        var Records = Bmob.Object.extend('AdShowRecords');
+                        var query = new Bmob.Query(Records);
+
+                        query.equalTo('ader',vAder);
+                        query.count({
+                                success: function (count) {
+
+                                    console.log("总纪录数为"+count);
+                                    if(count>=vAder.get('fanxianCount'))
+                                        callback(null,true);
+                                    else
+                                        callback(null,false);
+                                    //console.log(results.length);
+                                    // callback(err,results[0]);
+                                },
+                                error: function (error) {
+                                    callback(error);
+                                }
+                            }
+                        );
+                    }
+                }
+            ],
+            function (err, result) {
+                console.log('result:'+result.toString());
+                if(result)
+                console.log('you make money');
+                else
+                console.log('no money,keep looking');
+
+                callback(err,result.toString());
+            });
+    } catch (error) {
+        console.log(error);
+    }
+
+
+}
+/*
+ function search4Click
+ STEP 1:当前广告商是否达到该用户展示累计次数的要求
+ ΣB3>=A4
+ 1.1获得当前广告商对象数据
+ 1.2该用户该广告商广告的纪录次数
+
+ STEP 2:当前广告商总展示累计次数达到要求
+ ΣB1>=A5
+ 2.1该广告商的总纪录次数
+ 2.2比较
+
+ */
 /*
  ----------------test function-------------------
  */

@@ -14,7 +14,9 @@ var adrecord1={'adType':33,'userId':'000000','duringTime':''};
 var adrecord2={'adType':34,'userId':'000008','duringTime':''};
 adrecord2.applyTimes=currenttime;
 adrecord1.applyTimes=currenttime;
-
+/*
+添加某个广告商的show纪录
+ */
 exports.x=function(req,res,next){
     //newAd.newADer("AdUnion",ader1);
     var Aders = Bmob.Object.extend('AdUnion');
