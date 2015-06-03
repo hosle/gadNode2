@@ -31,7 +31,11 @@ exports.z=function(req,res,next){
     try{
         async.waterfall([
                 function a(callback){
-                    searchAdUnion.search4Click('huawei',callback);
+                    var ader=req.query.ader;
+                    if(ader!=null)
+                        searchAdUnion.search4Click(ader,callback);
+                    else
+                        callback(null,'未选择具体广告商');
                 }],
             function(err,result){
 

@@ -7,13 +7,13 @@ var util=require('../public/javascripts/util');
 var Bmob=require('Bmob').Bmob;
 Bmob.initialize('658f6515b185c5e53d612986bb6f79c6','089c27ec398ea3934dd350ddd3760311');
 
-var ader1={'aderName':'baidu','ratio':3,'timeGap':20,'fanxianCount':50,'personalShowUpLimit':100};
-var ader2={'aderName':'ali','ratio':4,'timeGap':30,'fanxianCount':50,'personalShowUpLimit':50};
+var ader1={'aderName':'baidu','ratio':3,'timeGap':20,'totalShowLowerLimit':50,'personalShowUpLimit':100};
+var ader2={'aderName':'ali','ratio':4,'timeGap':30,'totalShowLowerLimit':50,'personalShowUpLimit':50};
 var currenttime=util.getCurrentTime();
 var adrecord1={'adType':33,'userId':'000000','duringTime':''};
 var adrecord2={'adType':34,'userId':'000008','duringTime':''};
-adrecord2.applyTimes=currenttime;
-adrecord1.applyTimes=currenttime;
+adrecord2.applyTime=currenttime;
+adrecord1.applyTime=currenttime;
 /*
 添加某个广告商的show纪录
  */
