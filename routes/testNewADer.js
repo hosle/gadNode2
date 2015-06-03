@@ -4,7 +4,7 @@
 var newAd=require('../public/javascripts/newADer');
 var adrecord=require('../public/javascripts/addADRecord');
 var util=require('../public/javascripts/util');
-var Bmob=require('Bmob').Bmob;
+var Bmob=require('bmob').Bmob;
 Bmob.initialize('658f6515b185c5e53d612986bb6f79c6','089c27ec398ea3934dd350ddd3760311');
 
 var ader1={'aderName':'baidu','ratio':3,'timeGap':20,'totalShowLowerLimit':50,'personalShowUpLimit':100};
