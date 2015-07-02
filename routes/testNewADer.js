@@ -10,8 +10,8 @@ Bmob.initialize('658f6515b185c5e53d612986bb6f79c6','089c27ec398ea3934dd350ddd376
 var ader1={'aderName':'baidu','ratio':3,'timeGap':20,'totalShowLowerLimit':50,'personalShowUpLimit':100};
 var ader2={'aderName':'ali','ratio':4,'timeGap':30,'totalShowLowerLimit':50,'personalShowUpLimit':50};
 var currenttime=util.getCurrentTime();
-var adrecord1={'adType':33,'userId':'000000','duringTime':''};
-var adrecord2={'adType':34,'userId':'000008','duringTime':''};
+var adrecord1={'adType':33,'userId':'000000','duringTime_sec':'10'};
+var adrecord2={'adType':34,'userId':'000008','duringTime_sec':'10'};
 adrecord2.applyTime=currenttime;
 adrecord1.applyTime=currenttime;
 /*
@@ -21,7 +21,7 @@ exports.x=function(req,res,next){
     //newAd.newADer("AdUnion",ader1);
     var Aders = Bmob.Object.extend('AdUnion');
     var query = new Bmob.Query(Aders);
-    query.equalTo('aderName','qyer');
+    query.equalTo('aderName','gdt');
     query.find({
             success: function (results) {
                 console.log(results[0].id+"");

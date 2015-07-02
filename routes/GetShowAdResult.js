@@ -3,17 +3,30 @@
  */
 var searchAdUnion=require('../public/javascripts/searchAdUnion');
 var async=require('async');
+var util=require('../public/javascripts/util');
 
 
 exports.x=function(req,res,next){
     try{
         async.waterfall([
             function a(callback){
-              searchAdUnion.search4Show(callback);
+                var uid=req.query.uid;
+              searchAdUnion.search4Show(uid,callback);
             }],
-            function(err,result){
-                var aderName=result.get('aderName');
-                res.render('resultInfo',{info:aderName});
+            function(err,result) {
+                if (result != null) {
+
+                    var aderName = result.get('aderName');
+                    var currenttime = util.getCurrentTime();
+                }else
+                {
+                    var aderName = null;
+                    var currenttime = null;
+                }
+                //res.render('resultInfo',{info:aderName});
+                res.end(JSON.stringify({info: aderName, applytime: currenttime}));
+
+                //res.json({info:aderName,applytime:currenttime});
         });
     }catch (error)
     {

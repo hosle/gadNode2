@@ -33,7 +33,7 @@ router.mapRoute=function(app){
     app.get('/applyclick',searchresult.z);
 
     //addAdshowRecord
-    app.get('/addRecord',addrecord.x);
+    app.use('/addRecord',addrecord.x);
 
 }
 
