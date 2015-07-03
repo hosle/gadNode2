@@ -44,15 +44,17 @@ exports.z=function(req,res,next){
     try{
         async.waterfall([
                 function a(callback){
+                    var uid=req.query.uid;
                     var ader=req.query.ader;
                     if(ader!=null)
-                        searchAdUnion.search4Click(ader,callback);
+                        searchAdUnion.search4Click(uid,ader,callback);
                     else
                         callback(null,'未选择具体广告商');
                 }],
             function(err,result){
 
-                res.render('resultInfo',{info:result});
+                //res.render('resultInfo',{info:result});
+                res.end(result);
             });
     }catch (error)
     {

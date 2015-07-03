@@ -12,6 +12,7 @@ router.mapRoute=function(app){
     var newer=require('./testNewADer');
     var searchresult=require('./GetShowAdResult');
     var addrecord=require('./AddAdShowRecord');
+    var delrecord=require('./DelAdShowRecord');
 
     //index
     app.use('/',index);
@@ -34,6 +35,9 @@ router.mapRoute=function(app){
 
     //addAdshowRecord
     app.use('/addRecord',addrecord.x);
+
+    //deleteAdshowRecord
+    app.get('/delRecord',delrecord.x);
 
 }
 

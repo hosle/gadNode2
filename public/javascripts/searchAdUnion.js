@@ -16,7 +16,7 @@ var personalShowLowerLimit;
 var totalShowLowerLimit;
 //A6
 //未获取值
-//var personalShowUpLimit;
+var personalShowUpLimit;
 //全部的广告商集合
 var allAders;
 
@@ -36,7 +36,7 @@ var userId = '000008';
  */
 var countRecords_eachAder = function (aderslist, callback) {
     async2.map(aderslist, function (item, callback) {
-        var personalShowUpLimit=item.get('personalShowUpLimit');
+
         console.log(item.get('aderName')+'的personalShowUpLimit:'+personalShowUpLimit);
         var AdRecord = Bmob.Object.extend("AdShowRecords");
         var query = new Bmob.Query(AdRecord);
@@ -48,13 +48,16 @@ var countRecords_eachAder = function (aderslist, callback) {
                     // 查询成功，返回记录数量
                     //if(results.length<personalShowUpLimit)
                     var itemName = item.get('aderName');
+                    personalShowUpLimit=item.get('personalShowUpLimit');
+                    console.log(itemName + "共有 " + results.length + " 条记录,"+'上限'+personalShowUpLimit);
 
                     if (results.length > 0 && results.length < personalShowUpLimit) {
 
-                        console.log(itemName + "共有 " + results.length + " 条记录");
+                        //console.log(itemName + "共有 " + results.length + " 条记录");
                         //adersCollection2.push(results[0].get('ader'));
                         //console.log(results[0].get('adType'));
                         time_latestShow[itemName] = results[0].get('applyTime');
+                        console.log(itemName+'申请时间'+time_latestShow[itemName]);
 
                         //time_latestShow.itemName=results[0].get('applyTimes');
                         callback(null, results[0]);
@@ -150,7 +153,7 @@ exports.search4Show = function (userid,callback) {
                         success: function (results) {
                             allAders = results;
                             console.log("allAders所有广告商查询成功");
-                            //console.log(results.length);
+                            console.log(results.length);
                             callback(null);
                         },
                         error: function (error) {
@@ -201,15 +204,20 @@ exports.search4Show = function (userid,callback) {
 
         ], function (err, result) {
             if (err)throw err;
-            if (result != null)
-            //console.log("最终结果" + result[0].get('aderName'));
+            //if (result != null)
+            if(result.length>0) {
+
                 result.forEach(function (a) {
                     console.log("最终新筛选广告商数组" + a.get('aderName'));
                 });
-            targetAder = result[0];
+                targetAder = result[0];
+                console.log('最终targetAder' + result[0].get('aderName'));
+
+            }else targetAder=null;
+
             //console.log(result);
             //return result[0];
-            callback(null, result[0]);
+            callback(null, targetAder);
         });
 
         //return targetAder;
@@ -249,7 +257,7 @@ exports.search4Show = function (userid,callback) {
  */
 
 
-exports.search4Click = function (vAderName,callback) {
+exports.search4Click = function (vUsrId,vAderName,callback) {
     try {
         async.waterfall([
                 function getAder(callback) {
@@ -324,11 +332,11 @@ exports.search4Click = function (vAderName,callback) {
                     else{
                         var count=0;
                         for(var i=0;i<vAdRecords.length;i++){
-                            if(vAdRecords[i].get('userId')==userId)
+                            if(vAdRecords[i].get('userId')==vUsrId)
                             //console.log(vAdRecords[i].get('userId'));
                             count++;
                         }
-                        console.log(userId+"的该广告商总纪录数为"+count);
+                        console.log(vUsrId+"的该广告商总纪录数为"+count);
 
                         if(count>=personalShowLowerLimit)
                             callback(null,true);
@@ -342,11 +350,11 @@ exports.search4Click = function (vAderName,callback) {
                 console.log('result:'+result.toString());
                 if(result) {
                     console.log('you make money');
-                    callback(err,result.toString()+'!you make money');
+                    callback(err,result.toString());
                 }
                 else{
                     console.log('no money,keep looking');
-                    callback(err,result.toString()+'!no money,keep looking');
+                    callback(err,result.toString());
                 }
 
             });
