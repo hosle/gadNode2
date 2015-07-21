@@ -31,13 +31,16 @@ var targetAder;
 //未获取值
 var userId = '000008';
 
+//所有广告商的ratio之和
+var ratioTotal=0;
+
 /*
  对每一个广告商进行查询，找到该用户每个广告商的展示次数
  */
 var countRecords_eachAder = function (aderslist, callback) {
     async2.map(aderslist, function (item, callback) {
 
-        console.log(item.get('aderName')+'的personalShowUpLimit:'+personalShowUpLimit);
+
         var AdRecord = Bmob.Object.extend("AdShowRecords");
         var query = new Bmob.Query(AdRecord);
         query.equalTo("userId", userId);
@@ -154,6 +157,8 @@ exports.search4Show = function (userid,callback) {
                             allAders = results;
                             console.log("allAders所有广告商查询成功");
                             console.log(results.length);
+
+
                             callback(null);
                         },
                         error: function (error) {
@@ -167,6 +172,7 @@ exports.search4Show = function (userid,callback) {
                 // var adersCollection2=[];
                 console.log('userId:' + userId);
 
+                console.log('-----------------countRecords_eachAder-------------------');
                 countRecords_eachAder(allAders, callback);
 
             },
@@ -179,10 +185,12 @@ exports.search4Show = function (userid,callback) {
                     i++;
                     if(typeof item=="object")
                         console.log(i + ":" + item.get('ader'));
+                        //console.log(i+":"+item.get(''));
                     else
                         console.log(i + ":" +item+"hasn't shown before");
                 });
 
+                console.log('-----------------getAderlist_detail-------------------');
                 getAderlist_detail(newlist, callback);
 
             },
@@ -190,33 +198,58 @@ exports.search4Show = function (userid,callback) {
 
                 var curTime = util.getCurrentTime();
                 var newlist = [];
+                console.log('-----------------countGapTime-------------------');
                 for (var i = 0; i < list.length; i++) {
                     var itemName = list[i].get('aderName');
                     if (util.diffTime(curTime, time_latestShow[itemName]) > list[i].get('timeGap')) {
                         newlist.push(list[i]);
-                        console.log('diffTime' + util.diffTime(curTime, time_latestShow[itemName]));
-                        console.log(list[i].get('aderName'));
-                        //console.log('timeGap:'+list[i].get('timeGap'));}
+                        console.log(itemName+'的diffTime' + util.diffTime(curTime, time_latestShow[itemName]));
                     }
                 }
                 callback(null, newlist);
-            }
+            },
+
+            //ratio得到权重的随机数，随即选择广告商
 
         ], function (err, result) {
             if (err)throw err;
-            //if (result != null)
+
+            console.log('-----------------result: random with ratio-------------------');
             if(result.length>0) {
 
-                result.forEach(function (a) {
-                    console.log("最终新筛选广告商数组" + a.get('aderName'));
+                targetAder=null;
+                var itemratio;
+                ratioTotal=0;
+                result.forEach(function(item){
+                    itemratio=item.get('ratio');
+                    ratioTotal+=itemratio;
                 });
-                targetAder = result[0];
-                console.log('最终targetAder' + result[0].get('aderName'));
+                console.log('all available ader ratio total:'+ratioTotal);
+
+                //ratio得到权重的随机数0-10，选择广告商
+                var ranNum=util.myRand(11)-1;
+                console.log('random Num:'+ranNum);
+                itemratio=0;
+                var ratiopoint=0;
+                var ratiopointNext=0;
+                result.forEach(function (item) {
+                    itemratio=item.get('ratio');
+
+                    itemratio=parseInt((itemratio/ratioTotal)*10);
+                    ratiopointNext=ratiopoint+itemratio;
+
+                    console.log("最终新筛选广告商数组" + item.get('aderName')+',ratio:'+itemratio+'，ratio范围:'+ratiopoint+'至'+ratiopointNext);
+
+                    if(ranNum>=ratiopoint&&ranNum<ratiopointNext)
+                        targetAder=item;
+                    ratiopoint+=itemratio;
+                });
+                if(targetAder==null)
+                    targetAder=result[result.length-1];
+                console.log('最终targetAder:' + targetAder.get('aderName'));
 
             }else targetAder=null;
 
-            //console.log(result);
-            //return result[0];
             callback(null, targetAder);
         });
 

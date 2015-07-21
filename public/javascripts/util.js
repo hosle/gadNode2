@@ -45,3 +45,24 @@ exports.diffTime=function(dt1,dt2){
         return e.message;
     }
 }
+
+/*
+获取1-number的随机数
+ */
+exports.myRand=function (number) {
+
+    rnd.today=new Date();
+
+    rnd.seed=rnd.today.getTime();
+
+    function rnd() {
+
+        rnd.seed = (rnd.seed*9301+49297) % 233280;
+
+        return rnd.seed/(233280.0);
+
+    };
+
+    return Math.ceil(rnd()*number);
+
+};
